@@ -93,6 +93,12 @@ ___
 ## composer.json
 Установка с помощью [composer](https://getcomposer.org/download/)
 
+Локально:
+$ `php composer.phar require andy87/yii2-components "master"`
+
+Глобально:
+$ `composer require andy87/yii2-components "master"`
+
 Добавить в `composer.json`  
 <small>require</small>
 ```
@@ -109,7 +115,7 @@ ___
         "type"                  : "package",
         "package"               : {
             "name"                  : "andy87/yii2-components",
-            "version"               : "1.3.5",
+            "version"               : "1.0.0",
             "source"                : {
                 "type"                  : "git",
                 "reference"             : "main",
