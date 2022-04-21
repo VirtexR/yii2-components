@@ -4,7 +4,7 @@
   },
   "name"        : "andy87/yii2-components",
   "description" : "Components library",
-  "version"     : "1.3.5",
+  "version"     : "1.0.0",
   "repositories": [
     {
       "type"      : "vcs",
