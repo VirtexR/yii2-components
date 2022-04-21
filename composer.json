@@ -1,0 +1,14 @@
+{
+  "require"     : {
+    "php"         : ">=8.0"
+  },
+  "name"        : "andy87/yii2-components",
+  "description" : "Components library",
+  "version"     : "1.3.5",
+  "repositories": [
+    {
+      "type"      : "vcs",
+      "url"       : "https://github.com/andy87/yii2-components"
+    }
+  ]
+}
