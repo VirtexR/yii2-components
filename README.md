@@ -48,9 +48,13 @@ if ( Yii::$app->request->isPost )
 }
 
 // список моделей для отображения в шаблоне + 2 новые модели
-$models = OrderItems::find()->where(['order_id' => 1])->all();
-$models[] = new OrderItems();
-$models[] = new OrderItems();
+$orderItemCollection->addModels(
+    OrderItems::find()
+        ->where(['order_id' => 1])
+        ->all()
+);
+$orderItemCollection->addModel( new OrderItems() );
+$orderItemCollection->addModel( new OrderItems() );
 
 ```
 
@@ -65,7 +69,7 @@ $orderItemCollection->setForm($form);
 // Other input fields 
 
 // выводим поля для заполнения, где аттрибут `name` будет подходить для обработки классом `Collection` 
-foreach( $models as $orderItem )
+foreach( $orderItemCollection->getData() as $orderItem )
 {
     $orderItemCollection
         ->field( $orderItem, 'name',  'textInput', ['maxlength' => true] ) //возвращает ActiveField
