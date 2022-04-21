@@ -123,7 +123,7 @@ $ `composer require andy87/yii2-components "master"`
             },
             "autoload": {
                 "psr-4": {
-                    "andy87\\yii_components\\" : "src",
+                    "andy87\\yii_components\\" : "src"
                 }
             }
         }
