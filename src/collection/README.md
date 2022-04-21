@@ -126,7 +126,7 @@ $orderItemCollection->setForm($form);
 
 $form->field($order, 'number')->textInput();
 
-foreach( $models as $orderItem )
+foreach( $orderItemCollection->getData() as $orderItem )
 {
     $orderItemCollection
         ->field( $orderItem, 'name',  'textInput', ['maxlength' => true] )
@@ -139,12 +139,16 @@ foreach( $models as $orderItem )
 ```
 `Action`
 ```php
-public function actionUpdate()
+public function actionUpdate( int $id )
 {
     $order = new Order();
     $orderItemCollection = new Collection( OrderItem::class );
-    $orderItemModels = OrderItems::find()->where(['order_id' => 1])->all();
-    $orderItemModels[] = new OrderItems();
+    $orderItemCollection->addModels(
+        OrderItems::find()
+            ->where(['order_id' => $id])
+            ->all()
+    );
+    $orderItemCollection->addModel( new OrderItems() );
     
     if ( Yii::$app->request->isPost ) {
         $post = Yii::$app->request->post();
