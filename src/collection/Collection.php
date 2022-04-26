@@ -17,11 +17,6 @@ use yii\widgets\ActiveForm;
 class Collection
 {
 
-    /** @var string Ключ новых данных */
-    const KEY_NEW = 'new';
-
-
-
     /** @var ActiveForm Для создания полей */
     public ActiveForm $form;
 
@@ -30,6 +25,9 @@ class Collection
 
     /** @var ActiveRecord Модель используемая в коллекции */
     public ActiveRecord $class;
+
+    /** @var int $i Итератор, для подсчёта `id` новых моделей */
+    private int $i = 1;
 
     /** @var array $data Список моделей коллекции */
     private array $data = [];
@@ -61,52 +59,25 @@ class Collection
      * Пакетное заполнение коллекции(массив `data`) моделями.
      *
      * @param array $params Массив аттрибутов и их данных
-     * @param bool $prepare Массив подготовлен ?
      * @return self
      */
-    public function loadModels( array $params, bool $prepare = false ): self
+    public function loadModels( array $params = [] ): self
     {
-        $paramsList = $params[ $this->className ] ?? $params;
-        $attrList   = array_keys($params);
-        $index      = 0;
+        $paramsList = ( empty($params) )
+            ? $this->getPostData()
+            : ( $params[ $this->className ] ?? $params );
 
-        do
+        foreach ( $paramsList as $id => $attributes )
         {
-            $attr = null;
-
-            if ( $prepare )
+            if ( is_integer($id) &&  $id > 0 )
             {
-                $params = $paramsList[ $index ];
-
-                if ( isset($params['id']) )
-                {
-                    /** @var ActiveRecord $model */
-                    $model = $this->class::findOne($params['id']);
-
-                    $model->setAttributes( $params );
-
-                    $this->addModel($model);
-
-                } else {
-
-                    $this->constructModel($params);
-                }
+                $this->insertModel( $id, $attributes );
 
             } else {
 
-                $params = [];
-
-                foreach ( $attrList as $attr )
-                {
-                    $params[$attr] = $paramsList[$attr][ $index ];
-                }
-
-                $this->constructModel($params);
+                $this->constructModel( $attributes );
             }
-
-            $index++;
-
-        } while( isset( $this->params[$attr][$index] ) );
+        }
 
         return $this;
     }
@@ -179,6 +150,17 @@ class Collection
         $this->addModel( $model, $save, $validation );
 
         return $model;
+    }
+
+    /**
+     * @param $criteria
+     * @return self
+     */
+    public function findModels($criteria): self
+    {
+        $this->data = $this->class::findAll($criteria);
+
+        return $this;
     }
 
     /**
@@ -261,18 +243,11 @@ class Collection
      * @param ?callable $callback Callback функция, которая будет вызвана
      * @return self
      */
-    public function postHandler( ?callable $callback = null ): self
+    public function handler( ?callable $callback = null ): self
     {
-        foreach ($this->getPostData() as $key => $data) {
-            if (is_integer($key)) {
-                $this->insertModel($data['id'], $data);
-            } elseif ($key == self::KEY_NEW ) {
-                $this->loadModels($data);
-            }
-        }
+        $this->loadModels();
 
-        if ( $callback )
-        {
+        if ( $callback ) {
             $this->foreach($callback);
         }
 
@@ -287,16 +262,17 @@ class Collection
      *      - можно отменить валидацию при сохранении
      *
      * @param bool $validation При сохранении валидировать модель?
-     * @return self
+     * @return bool
      */
-    public function save( bool $validation = true ): self
+    public function save( bool $validation = true ): bool
     {
-        $this->foreach(function (ActiveRecord $model) use($validation)
-        {
-            $model->save($validation);
-        });
+        foreach ( $this->data as $model ) {
+            if ( !$model->save($validation) ) {
+                return false;
+            }
+        }
 
-        return $this;
+        return true;
     }
 
 
@@ -328,19 +304,33 @@ class Collection
      */
     public function field( ActiveRecord $model, string $attr, string $method, array $params = []): ActiveField
     {
-        if ( $model->isNewRecord )
-        {
-            $new = self::KEY_NEW;
-            $name = "{$this->class}[$new][$attr][]";
-
-        } else {
-            $id = $model->getAttribute('id');
-            $name = "{$this->class}[$id][$attr]";
-        }
-
-        $params = array_merge($params,['name' => $name]);
+        $params = array_merge($params,[
+            'name' => $this->generateName($model, $attr )
+        ]);
 
         return $this->form->field( $model, $attr )->$method($params);
+    }
+
+    /**
+     * Генерирует имя для полей ввода данных
+     *
+     * @param ActiveRecord $model
+     * @param $attr
+     * @return string
+     */
+    public function generateName( ActiveRecord $model, $attr ): string
+    {
+        if ( $model->isNewRecord )
+        {
+            $id = ( -1 * $this->i );
+            $this->i++;
+
+        } else {
+
+            $id = $model->getAttribute('id');
+        }
+
+        return "{$this->class}[$id][$attr]";
     }
 
 
