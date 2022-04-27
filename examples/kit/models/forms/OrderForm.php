@@ -5,7 +5,7 @@ namespace app\models\forms;
 use Yii;
 use app\models\Order;
 use app\models\OrderItem;
-use andy87\yii_components\collection\Collection;
+use andy87\yii_components\collection\Kit;
 
 /**
  *  Форма `OrderForm`.
@@ -13,15 +13,15 @@ use andy87\yii_components\collection\Collection;
  */
 class OrderForm extends Order
 {
-    /** @var ?Collection $orderItemsCollection  */
-    public ?Collection $orderItemsCollection = null;
+    /** @var ?Kit $orderItemsKit  */
+    public ?Kit $orderItemsKit = null;
 
     public function init()
     {
         parent::init();
 
         // Инициализируем коллекцию
-        $this->orderItemsCollection = new Collection( OrderItem::class );
+        $this->orderItemsKit = new Kit( OrderItem::class );
     }
 
     /**
@@ -32,7 +32,7 @@ class OrderForm extends Order
     public function load($data, $formName = null): bool
     {
         // Загружаем модели в коллекцию
-        $this->orderItemsCollection->loadModels();
+        $this->orderItemsKit->loadModels();
 
         return parent::load($data, $formName);
     }
@@ -45,7 +45,7 @@ class OrderForm extends Order
     {
         if ( $model = parent::findOne($condition))
         {
-            $model->orderItemsCollection->findModels(['order_id' => $model->id]);
+            $model->orderItemsKit->findModels(['order_id' => $model->id]);
 
             return $model;
         }
@@ -66,7 +66,7 @@ class OrderForm extends Order
 
             if ( parent::save($runValidation, $attributeNames) )
             {
-                if ( $this->orderItemsCollection->save() )
+                if ( $this->orderItemsKit->save() )
                 {
                     $transaction->commit();
 

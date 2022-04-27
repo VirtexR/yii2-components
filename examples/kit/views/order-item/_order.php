@@ -3,10 +3,10 @@
 use yii\web\View;
 use yii\widgets\ActiveForm;
 use app\models\OrderItem;
-use andy87\yii_components\collection\Collection;
+use andy87\yii_components\Kit;
 
 /** @var View $this  */
-/** @var Collection $orderItemsCollection  */
+/** @var Kit $orderItemsKit  */
 /** @var ActiveForm $form  */
 
 
@@ -14,23 +14,23 @@ use andy87\yii_components\collection\Collection;
  * @var int $index
  * @var OrderItem $orderItem
  */
-foreach ( $orderItemsCollection->getData() as $index => $orderItem )
+foreach ( $orderItemsKit->getData() as $index => $orderItem )
 {
     $index++;
 
-    echo $orderItemsCollection->field( $orderItem, 'cost', 'textInput', [
+    echo $orderItemsKit->field( $orderItem, 'cost', 'textInput', [
             'placeholder' => 'кол-во товара'
         ])
         ->label("Кол-во товара $index");
 
-    echo $orderItemsCollection->field( $orderItem, 'price', 'textInput', [
+    echo $orderItemsKit->field( $orderItem, 'price', 'textInput', [
             'placeholder' => 'стоимость товара'
         ])
         ->label("Кол-во товара $index");
 
 
     // без дополнительных параметров
-    echo $orderItemsCollection->field( $orderItem, 'article', 'hiddenInput');
+    echo $orderItemsKit->field( $orderItem, 'article', 'hiddenInput');
 
     ?>
     <!-- если надо применить кастомный HTML -->
@@ -38,7 +38,7 @@ foreach ( $orderItemsCollection->getData() as $index => $orderItem )
         <label>
             <input
                 type="number"
-                name="<?=$orderItemsCollection->generateName($orderItem, 'article')?>"
+                name="<?=$orderItemsKit->generateName($orderItem, 'article')?>"
                 value=""
             >
         </label>

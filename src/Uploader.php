@@ -3,12 +3,12 @@
  * @url https://github.com/andy87/yii2-components
  */
 
-namespace andy87\yii_components\file_uploader;
+namespace andy87\yii_components;
 
 use Yii;
-use yii\web\UploadedFile;
-use yii\base\Model;
 use Exception;
+use yii\base\Model;
+use yii\web\UploadedFile;
 
 /**
  * Помощник загрузки файлов.
@@ -20,7 +20,7 @@ use Exception;
  * @property string $file_name Сгенерированное имя файла
  * @property string $file_path Сгенерированный путь расположения файла
  */
-class FileUploader
+class Uploader
 {
     /** @var Model $model Модель/форма для которой загружается файл */
     protected Model $model;

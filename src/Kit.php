@@ -3,34 +3,40 @@
  * @url https://github.com/andy87/yii2-components
  */
 
-namespace andy87\yii_components\collection;
+namespace andy87\yii_components;
 
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\StringHelper;
-use yii\widgets\ActiveField;
-use yii\widgets\ActiveForm;
+use yii\widgets\{ActiveForm,ActiveField};
 
 /**
  * Класс взаимодействия с коллекциями новых моделей (для создания нескольких моделей)
+ *
+ * @property ActiveRecord $class Модель используемая в коллекции
+ * @property string $className Имя класса без пространства имён
+ * @property ActiveForm $form Для создания полей
+ * @property array $data Список моделей коллекции
+ * @property int $i Итератор, для подсчёта `id` новых моделей
  */
-class Collection
+class Kit
 {
-
-    /** @var ActiveForm Для создания полей */
-    public ActiveForm $form;
+    /** @var ActiveRecord Модель используемая в коллекции */
+    public ActiveRecord $class;
 
     /** @var string Имя класса без пространства имён */
     public string $className;
 
-    /** @var ActiveRecord Модель используемая в коллекции */
-    public ActiveRecord $class;
+    /** @var ActiveForm Для создания полей */
+    public ActiveForm $form;
 
-    /** @var int $i Итератор, для подсчёта `id` новых моделей */
-    private int $i = 1;
+
 
     /** @var array $data Список моделей коллекции */
     private array $data = [];
+
+    /** @var int $i Итератор, для подсчёта `id` новых моделей */
+    private int $i = 1;
 
 
 
@@ -282,7 +288,7 @@ class Collection
     /**
      * Установки для конструктора форм
      *
-     *  $collection = new Collection( OrderItem::class );
+     *  $collection = new Kit( OrderItem::class );
      *  $collection->setFormConfig($form, $model);
      *
      * @param ActiveForm $form
@@ -352,7 +358,7 @@ class Collection
      * Получение коллекции моделей
      *      Getter для внешнего использования
      *
-     *  $collection = new Collection( OrderItem::class, Yii::$app->request->post() );
+     *  $collection = new Kit( OrderItem::class, Yii::$app->request->post() );
      *
      *  foreach( $collection->getData() as $model ) {
      *      $model->save();

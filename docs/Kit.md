@@ -1,8 +1,8 @@
 
 
-# Обработчик одинаковых моделей
+# Обработчик комплекта одинаковых моделей
 
-Задача: сохранить пришедшие из POST данные, где содержатся данные нескольких одинаковых форм.
+Задача: сохранить пришедшие из POST данные, где содержатся данные нескольких одинаковых форм/моделей.
 
 Класс умеет заполнять собственный массив `data` моделями созданными на основе данных пришедших из формы с элементами `<input>` имеющими `name` вида:
  - Mode [ attr ] []
@@ -54,13 +54,13 @@ ___
 Код обработчика:
 ```php
 // добавит в коллекцию модели из запроса
-$collection = new Collection( OrderItem::class, Yii::$app->request->post() ); 
+$kit = new Kit( OrderItem::class, Yii::$app->request->post() ); 
 // сохранение всех моделей
-$collection->save();
+$kit->save();
 ```
 Краткая запись, без создания переменной:
 ```php 
-(new Collection( OrderItem::class, Yii::$app->request->post() ))->save();
+(new Kit( OrderItem::class, Yii::$app->request->post() ))->save();
 ```
 Если надо перебрать все модели и изменить/обновить какие-то данные.  
 Показан способ загрузить данные в коллекцию через метод: `loadModels()` и используется транзакция
@@ -83,18 +83,18 @@ public function actionCreate()
             if ( $order->load( $post ) AND $order->save( $post ) )
             {
                 // Инициализация коллекции, указываем с какой моделью она будет работать и 
-                $collection = new Collection( OrderItem::class );
+                $kit = new Kit( OrderItem::class );
                 
                 // Загружаем данные
-                $collection->loadModels($params);
+                $kit->loadModels($params);
                  
                 // Перебираем все модели обновляя данные 
-                $collection->foreach(function( OrderItem $model ) use($order) {
+                $kit->foreach(function( OrderItem $model ) use($order) {
                    $model->order_id = $order->id;
                 });
                  
                 // Сохраняем все модели
-                $collection->save();
+                $kit->save();
             }
             
             $transaction->commit();
@@ -122,17 +122,17 @@ ___
 `view`
 ```php
 $form = ActiveRecord::begin();
-$orderItemCollection->setForm($form);
+$orderItemKit->setForm($form);
 
 $form->field($order, 'number')->textInput();
 
-foreach( $orderItemCollection->getData() as $orderItem )
+foreach( $orderItemKit->getData() as $orderItem )
 {
-    $orderItemCollection
+    $orderItemKit
         ->field( $orderItem, 'name',  'textInput', ['maxlength' => true] )
         ->label('товар');
         
-    $orderItemCollection
+    $orderItemKit
         ->field( $orderItem, 'cost',  'textInput', ['maxlength' => true] )
         ->label('кол-во');
 }
@@ -142,13 +142,13 @@ foreach( $orderItemCollection->getData() as $orderItem )
 public function actionUpdate( int $id )
 {
     $order = new Order();
-    $orderItemCollection = new Collection( OrderItem::class );
-    $orderItemCollection->addModels(
+    $orderItemKit = new Kit( OrderItem::class );
+    $orderItemKit->addModels(
         OrderItems::find()
             ->where(['order_id' => $id])
             ->all()
     );
-    $orderItemCollection->addModel( new OrderItems() );
+    $orderItemKit->addModel( new OrderItems() );
     
     if ( Yii::$app->request->isPost ) {
         $post = Yii::$app->request->post();
@@ -156,7 +156,7 @@ public function actionUpdate( int $id )
         
         try {
             if ( $order->load( $post ) AND $order->save( $post ) ) {
-                $collection->postHandler(function( OrderItem $model ) use($order) {
+                $kit->postHandler(function( OrderItem $model ) use($order) {
                    $model->order_id = $order->id;
                    $model->save();
                 });
@@ -175,7 +175,7 @@ public function actionUpdate( int $id )
     return $this->render('template', [
         'order'                 => $order,
         'orderItemModels'       => $orderItemModels,
-        'orderItemCollection'   => $orderItemCollection,
+        'orderItemCollection'   => $orderItemKit,
     ]);
 }
 ```
@@ -197,8 +197,8 @@ ___
 
 <small>При наличии `html` элементов у которых значение аттрибута `name` имеет вид как описано в оглавлении</small>
 ```php
-$collection = new Collection( Post::class);
-$collection->loadModels([
+$kit = new Kit( Post::class);
+$kit->loadModels([
     'name` => [
         '...1',
         '...2',
@@ -211,8 +211,8 @@ $collection->loadModels([
 ```
 <small>При получении подготовленного массива надо передавать `true` в параметре `prepare`</small>
 ```php
-$collection = new Collection( Post::class);
-$collection->loadModels([
+$kit = new Kit( Post::class);
+$kit->loadModels([
    [
        'name' => '...1',
        'description' => '..description..1'
@@ -240,13 +240,13 @@ ___
 - `createInstance` получая параметры не добавляет модель в коллекцию
 
 ```php
-$collection = new Collection( OrderItem::class );
+$kit = new Kit( OrderItem::class );
  
 $model = new OrderItem();
 $model->name = '...';
 $model->cost = 1
  
-$collection->addModel( $model );
+$kit->addModel( $model );
 ```
 ___
 
@@ -260,9 +260,9 @@ ___
 В массив `data` добавляются множество `$model` (экземпляр класса  `ActiveRecord`)
 
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
+$orderItemKit = new Kit( OrderItem::class );
 
-$orderItemCollection->addModelList(
+$orderItemKit->addModelList(
     OrderItems::find()
         ->where(['order_id' => $order->id])
         ->all() 
@@ -286,15 +286,15 @@ ___
 - `createInstance` получая параметры не добавляет модель в коллекцию
 
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
+$orderItemKit = new Kit( OrderItem::class );
      
-$orderItemParamsList = $collection->getParams();
+$orderItemParamsList = $kit->getParams();
 
 foreach ( $orderItemParamsList as $orderItemParams ) {
-   $orderItemCollection->insertModel( $orderItemParams['id'], $orderItemParams );
+   $orderItemKit->insertModel( $orderItemParams['id'], $orderItemParams );
 }
 
-$orderItemCollection->save();
+$orderItemKit->save();
 ```
 ___
 
@@ -316,9 +316,9 @@ ___
 - `createInstance` получая параметры не добавляет модель в коллекцию
 
 ```php
-$orderItemCollection = new Collection( Post::class );
+$orderItemKit = new Kit( Post::class );
 
-$orderItemCollection
+$orderItemKit
     ->constructModel([
        'name' => '...',
        'cost' => 1,
@@ -346,9 +346,9 @@ ___
 - `constructModel` получая параметры добавляет модель в коллекцию
 
 ```php
-$orderItemCollection = new Collection( Post::class );
+$orderItemKit = new Kit( Post::class );
 
-$model = $orderItemCollection->createInstance();
+$model = $orderItemKit->createInstance();
 
 $model->name = '...';
 $model->cost = 1;
@@ -357,9 +357,9 @@ $model->save();
 
 Задать данные и сразу сохранить модель
 ```php
-$orderItemCollection = new Collection( Post::class );
+$orderItemKit = new Kit( Post::class );
 
-$model = $orderItemCollection->createInstance([
+$model = $orderItemKit->createInstance([
     'name' => '...',
     'cost' => 1,
 ], ( $save = true ));
@@ -376,11 +376,11 @@ ___
 
 Перебор в цикле всех моделей коллекции и вызов функции из аргумента с передачей в callback функцию модели в качестве первого аргумента
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
+$orderItemKit = new Kit( OrderItem::class );
 
-$orderItemCollection->handler();
+$orderItemKit->handler();
 
-$orderItemCollection->foreach(function($model) {
+$orderItemKit->foreach(function($model) {
     $model->status = Status::STATUS_NEW;
     $model->save();
 })
@@ -397,20 +397,20 @@ ___
 - принимает в качестве первого аргумента callback функцию в которую будет передана модель
 
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
-$orderItemCollection->handler();
-$orderItemCollection->save();
+$orderItemKit = new Kit( OrderItem::class );
+$orderItemKit->handler();
+$orderItemKit->save();
 ```
 Применение цепочки вызовов.
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
-$orderItemCollection->handler()->save();
+$orderItemKit = new Kit( OrderItem::class );
+$orderItemKit->handler()->save();
 ```
 использование callback функции:
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
+$orderItemKit = new Kit( OrderItem::class );
 
-$orderItemCollection->handler( function( OrderItem $model ){
+$orderItemKit->handler( function( OrderItem $model ){
     $model->status = OrderItem::STATUS_NEW;
     $model->save();
 });
@@ -425,9 +425,9 @@ ___
 - можно отменить валидацию при сохранении
 
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
-$orderItemCollection->handler();
-$orderItemCollection->save();
+$orderItemKit = new Kit( OrderItem::class );
+$orderItemKit->handler();
+$orderItemKit->save();
 ```
 
 
@@ -442,8 +442,8 @@ ___
 Установки для конструктора форм
 
 ```php
-$collection = new Collection( OrderItem::class );
-$collection->setFormConfig($form, $model);
+$kit = new Kit( OrderItem::class );
+$kit->setFormConfig($form, $model);
 ```
 ___
 
@@ -458,17 +458,17 @@ ___
 
 ```php
 $form = ActiveRecord::begin();
-$orderItemCollection = new Collection( OrderItem::class );
-$orderItemCollection->addModelList( OrderItems::find()->where(['order_id' => $order->id])->all() )
-$orderItemCollection->addModel( new OrderItems() );
-$orderItemCollection->addModel(new OrderItems() );
+$orderItemKit = new Kit( OrderItem::class );
+$orderItemKit->addModelList( OrderItems::find()->where(['order_id' => $order->id])->all() )
+$orderItemKit->addModel( new OrderItems() );
+$orderItemKit->addModel(new OrderItems() );
 
-$orderItemCollection->setForm($form);
+$orderItemKit->setForm($form);
 
-foreach( $orderItemCollection->getData() as $orderItem )
+foreach( $orderItemKit->getData() as $orderItem )
 {
-    $orderItemCollection->field( $orderItem, 'name',  'textInput', ['maxlength' => true] )->label('товар');
-    $orderItemCollection->field( $orderItem, 'cost',  'textInput', ['maxlength' => true] )->label('товар');
+    $orderItemKit->field( $orderItem, 'name',  'textInput', ['maxlength' => true] )->label('товар');
+    $orderItemKit->field( $orderItem, 'cost',  'textInput', ['maxlength' => true] )->label('товар');
 }
 ```
 
@@ -483,9 +483,9 @@ ___
 Получение коллекции моделей для внешнего использования
 
 ```php
-$collection = new Collection( Post::class, Yii::$app->request->post() );
+$kit = new Kit( Post::class, Yii::$app->request->post() );
      
-foreach( $collection->getData() as $model ) {
+foreach( $kit->getData() as $model ) {
    $model->save();
 }
 ```
@@ -497,9 +497,9 @@ ___
 Метод возвращает из `post` массив данных из ключа аналогичного имени класса `$this->className`
 
 ```php
-$collection = new Collection( Post::class );
+$kit = new Kit( Post::class );
  
-$data = $collection->getPostData();
+$data = $kit->getPostData();
 ```
 
 
@@ -511,6 +511,6 @@ ___
 Удаление всех моделей из коллекции
 
 ```php
-$orderItemCollection = new Collection( OrderItem::class );
-$orderItemCollection->drop();
+$orderItemKit = new Kit( OrderItem::class );
+$orderItemKit->drop();
 ```

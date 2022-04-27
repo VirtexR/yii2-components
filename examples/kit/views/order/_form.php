@@ -13,7 +13,7 @@ $form = ActiveForm::begin();
 $form->field($orderForm, 'user_id')->hiddenInput(['value' => Yii::$app->user->identity->getId() ]);
 
 echo $this->render('@views/order-item/_order',[
-    'orderItemsCollection' => $orderForm->orderItemsCollection,
+    'orderItemsKit' => $orderForm->orderItemsKit,
     'form' => $form
 ]);
 

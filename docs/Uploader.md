@@ -6,11 +6,11 @@
 
 
 
-`upload()`
+`upload()`  
 Загрузка одного файла.
 
 ```php
-use andy87\yii_components\file_uploader\FileUploader;
+use andy87\yii_components\file_uploader\Uploader;
 
 /**
  * Example upload
@@ -23,7 +23,7 @@ public function actionCrate()
     {
         if ( $model->load( $this->request->post() ) && $model->save() )
         {
-            $fileUploader = new FileUploader( $model, ['model_property' => 'model_attr_key'], '/path/to/upload' );
+            $fileUploader = new Uploader( $model, ['model_property' => 'model_attr_key'], '/path/to/upload' );
         
             if ( $fileUploader->upload() ) {
                 return $this->redirect([ 'view', 'id' => $model->id ]);
@@ -34,10 +34,11 @@ public function actionCrate()
 
 ```
 
-`uploadMultiply()`
+`uploadMultiply()`  
 Загрузка нескольких файлов
+
 ```php
-use andy87\yii_components\file_uploader\FileUploader;
+use andy87\yii_components\file_uploader\Uploader;
 /**
  * Example uploadMultiply
  */
@@ -49,7 +50,7 @@ public function actionUpdate( int $id )
     {
         if ( $model->load( $this->request->post() ) && $model->save() )
         {
-            $fileUploader = new FileUploader( $form, ['model_property' => 'model_attr_key'], '/path/to/upload' );
+            $fileUploader = new Uploader( $form, ['model_property' => 'model_attr_key'], '/path/to/upload' );
 
             if ( $fileUploader->uploadMultiply() ) {
                 return $this->redirect([ 'view', 'id' => $model->id ]);
