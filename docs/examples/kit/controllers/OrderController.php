@@ -21,10 +21,13 @@ class OrderController extends Controller
     {
         $orderForm = $this->find($id);
 
+        //всё стандартно...
         if ( Yii::$app->request->isPost )
         {
+            // `load()` внутри переназначен
             if ( $orderForm->load( Yii::$app->request->post()) )
             {
+                // `save()` внутри переназначен
                 if ( $orderForm->save() )
                 {
                     return $this->redirect("/order/view/{$orderForm->id}");
@@ -43,6 +46,7 @@ class OrderController extends Controller
      */
     private function find( int $id ): ?OrderForm
     {
+        // `findOne()` внутри переназначен
         if ( $orderForm = OrderForm::findOne($id))
         {
             return $orderForm;
