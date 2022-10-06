@@ -15,11 +15,11 @@ use andy87\yii_components\file_uploader\Uploader;
 /**
  * Example upload
  */
-public function actionCrate()
+public function actionCreate()
 {
     $model = new Order();
       
-    if ( Yii:$app->request->isPost )
+    if ( Yii::$app->request->isPost )
     {
         if ( $model->load( $this->request->post() ) && $model->save() )
         {
@@ -46,7 +46,7 @@ public function actionUpdate( int $id )
 {
     $model = Order::findOne($id);
       
-    if ( Yii:$app->request->isPost )
+    if ( Yii::$app->request->isPost )
     {
         if ( $model->load( $this->request->post() ) && $model->save() )
         {
